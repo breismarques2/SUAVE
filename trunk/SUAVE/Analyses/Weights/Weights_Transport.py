@@ -67,3 +67,4 @@ class Weights_Transport(Weights):
         self.settings.weight_reduction_factors.empennage = 0. # applied to horizontal and vertical stabilizers
         
         self.settings.empty = SUAVE.Methods.Weights.Correlations.Transport.empty
+        

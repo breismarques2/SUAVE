@@ -109,7 +109,7 @@ class Internal_Combustion_Propeller(Propulsor):
         # Check to see if magic thrust is needed, the ESC caps throttle at 1.1 already
         P[eta>1.0] = P[eta>1.0]*eta[eta>1.0]
         F[eta>1.0] = F[eta>1.0]*eta[eta>1.0]   
-        
+
         # link
         propeller.outputs = outputs
     
@@ -121,6 +121,8 @@ class Internal_Combustion_Propeller(Propulsor):
         conditions.propulsion.rpm                = rpm
         conditions.propulsion.propeller_torque   = Q
         conditions.propulsion.power              = P
+        conditions.propulsion.propeller_power_coefficient   = propeller.outputs.power_coefficient 
+        conditions.propulsion.propeller_thrust_coefficient  = propeller.outputs.thrust_coefficient
         conditions.propulsion.propeller_tip_mach = (R*rpm*Units.rpm)/a
         
         # Create the outputs

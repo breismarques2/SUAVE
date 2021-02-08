@@ -6,3 +6,7 @@ from .write_vsp_mesh import write_vsp_mesh
 from .vsp_write import write
 from .BEM_read import BEM_read
 from .get_fuel_tank_properties import get_fuel_tank_properties
+from .vsp_write_x57 import vsp_write_x57
+from .vsp_write_Tecnam import vsp_write_Tecnam
+from .vspaero import vspaero
+from .vspaero_Tecnam import vspaero_Tecnam

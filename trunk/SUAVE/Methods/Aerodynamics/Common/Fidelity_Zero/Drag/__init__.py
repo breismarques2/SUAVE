@@ -16,3 +16,6 @@ from .trim import trim
 from .spoiler_drag import spoiler_drag
 from .untrimmed import untrimmed
 from .total_aircraft import total_aircraft
+from .compressibility_drag_wing_oldversion import compressibility_drag_wing_oldversion
+from .compressibility_drag_wing_total_oldversion import compressibility_drag_wing_total_oldversion
+from .induced_drag_aircraft_oldversion import induced_drag_aircraft_oldversion

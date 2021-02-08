@@ -10,3 +10,4 @@ from .Weights_UAV                        import Weights_UAV
 from .Weights_Electric_Multicopter       import Weights_Electric_Multicopter
 from .Weights_Electric_Lift_Cruise       import Weights_Electric_Lift_Cruise 
 from .Weights_Electric_Vectored_Thrust   import Weights_Electric_Vectored_Thrust
+from .Weights_General_Aviation           import Weights_General_Aviation 

@@ -23,7 +23,7 @@ import warnings
 #  Empty
 # ----------------------------------------------------------------------
 ## @ingroup Methods-Weights-Correlations-General_Aviation
-def empty(vehicle):
+def empty(vehicle,settings=None):
     """ output = SUAVE.Methods.Weights.Correlations.Tube_Wing.empty(engine,wing,aircraft,fuselage,horizontal,vertical)
         Computes the empty weight breakdown of a General Aviation type aircraft  
         
@@ -243,7 +243,7 @@ def empty(vehicle):
         sweep_h            = vehicle.wings['horizontal_stabilizer'].sweeps.quarter_chord
         mac_h              = vehicle.wings['horizontal_stabilizer'].chords.mean_aerodynamic
         t_c_h              = vehicle.wings['horizontal_stabilizer'].thickness_to_chord
-        l_w2h              = vehicle.wings['horizontal_stabilizer'].origin[0] + vehicle.wings['horizontal_stabilizer'].aerodynamic_center[0] - vehicle.wings['main_wing'].origin[0] - vehicle.wings['main_wing'].aerodynamic_center[0] #used for fuselage weight
+        l_w2h              = vehicle.wings['horizontal_stabilizer'].origin[0][0] + vehicle.wings['horizontal_stabilizer'].aerodynamic_center[0] - vehicle.wings['main_wing'].origin[0][0] - vehicle.wings['main_wing'].aerodynamic_center[0] #used for fuselage weight
         wt_tail_horizontal = tail_horizontal(S_h, AR_h, sweep_h, q_c, taper_h, t_c_h,Nult,TOW)                
         
         vehicle.wings['horizontal_stabilizer'].mass_properties.mass = wt_tail_horizontal        
@@ -273,9 +273,9 @@ def empty(vehicle):
         diff_p_fus = vehicle.fuselages['fuselage'].differential_pressure
         w_fus      = vehicle.fuselages['fuselage'].width
         h_fus      = vehicle.fuselages['fuselage'].heights.maximum
-        l_fus      = vehicle.fuselages['fuselage'].lengths.structure
+        l_fus      = vehicle.fuselages['fuselage'].lengths.total
         V_fuse     = vehicle.fuselages['fuselage'].mass_properties.volume
-        V_int      = vehicle.fuselages['fuselage'].mass_properties.internal_volume 
+        #V_int      = vehicle.fuselages['fuselage'].mass_properties.internal_volume 
         num_seats  = vehicle.fuselages['fuselage'].number_coach_seats 
         #calculate fuselage weight
         wt_fuselage = fuselage(S_fus, Nult, TOW, w_fus, h_fus, l_fus, l_w2h, q_c, V_fuse, diff_p_fus)
@@ -292,9 +292,14 @@ def empty(vehicle):
 
     else: 
         landing_gear_component = vehicle.landing_gear #landing gear previously defined
-        strut_length_main      = landing_gear_component.main.strut_length
-        strut_length_nose      = landing_gear_component.nose.strut_length
+        strut_length_main      = landing_gear_component.main_strut_length
+        strut_length_nose      = landing_gear_component.nose_strut_length
         wt_landing_gear        = landing_gear(landing_weight, Nult, strut_length_main, strut_length_nose)
+        
+        landing_gear_component.main = Data()
+        landing_gear_component.main.mass_properties = Data()
+        landing_gear_component.nose = Data()
+        landing_gear_component.nose.mass_properties = Data()
         
         landing_gear_component.main.mass_properties.mass = wt_landing_gear.main
         landing_gear_component.nose.mass_properties.mass = wt_landing_gear.nose

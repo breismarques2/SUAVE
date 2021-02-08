@@ -184,7 +184,7 @@ def update_aerodynamics(segment):
     # unpack results
     CL = results.lift.total
     CD = results.drag.total
-
+    
     CL[q<=0.0] = 0.0
     CD[q<=0.0] = 0.0
     

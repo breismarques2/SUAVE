@@ -21,6 +21,8 @@ import SUAVE
 from SUAVE.Core import Units, Data
 
 try:
+    import sys
+    sys.path.insert(0, '/Users/Bruno/OpenVSP-python3/OpenVSP/build/python_api')
     import vsp as vsp
 except ImportError:
     # This allows SUAVE to build without OpenVSP
@@ -103,7 +105,7 @@ def write(vehicle,tag,fuel_tank_set_ind=3,verbose=True):
     try:
         vsp.ClearVSPModel()
     except NameError:
-        print('VSP import failed')
+        print('VSP import failed - vspwrite')
         return -1
     
     area_tags = dict() # for wetted area assignment
@@ -600,6 +602,7 @@ def write_vsp_fuselage(fuselage,area_tags, main_wing, fuel_tank_set_ind):
         # Figure out the location x location of each section, 3 sections, end of nose, wing origin, and start of tail
         
         x1 = n_fine*width/length
+        print(w_origin[0][0])
         x2 = (w_origin[0][0]+w_c_4)/length
         x3 = 1-t_fine*width/length
         

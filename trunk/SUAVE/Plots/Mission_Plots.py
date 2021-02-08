@@ -49,14 +49,23 @@ def plot_altitude_sfc_weight(results, line_color = 'bo-', save_figure = False, s
     """	  
     axis_font = {'size':'14'} 
     fig = plt.figure(save_filename)
-    fig.set_size_inches(10, 8) 
+    fig.set_size_inches(10, 8)
+    
+    file=open('PlottedResults.txt', 'a+')    
+    mass_full=[]
+    mdot_full=[]
+    sfc_full=[]
+    
     for segment in results.segments.values(): 
         time     = segment.conditions.frames.inertial.time[:,0] / Units.min 
-        mass     = segment.conditions.weights.total_mass[:,0] / Units.lb
+        mass     = segment.conditions.weights.total_mass[:,0]
+        mass_full.extend(mass)
         altitude = segment.conditions.freestream.altitude[:,0] / Units.ft
         mdot     = segment.conditions.weights.vehicle_mass_rate[:,0]
+        mdot_full.extend(mdot)
         thrust   =  segment.conditions.frames.body.thrust_force_vector[:,0]
         sfc      = (mdot / Units.lb) / (thrust /Units.lbf) * Units.hr
+        sfc_full.extend(sfc)
 
         axes = fig.add_subplot(3,1,1)
         axes.plot( time , altitude , line_color)
@@ -71,8 +80,12 @@ def plot_altitude_sfc_weight(results, line_color = 'bo-', save_figure = False, s
 
         axes = fig.add_subplot(3,1,2)
         axes.plot( time , mass , 'ro-' )
-        axes.set_ylabel('Weight (lb)',axis_font)
+        axes.set_ylabel('Weight (kg)',axis_font)
         set_axes(axes)
+        
+    file.write('Mass (kg) = '+str(mass_full)+'\n\n')
+    file.write('Vehicle Mass Rate (kg) = '+str(mdot_full)+'\n\n')
+    file.write('SFC (lb/lbf-hr) = '+str(sfc_full)+'\n\n')
         
     if save_figure:
         plt.savefig(save_filename + file_type)  
@@ -106,14 +119,25 @@ def plot_aircraft_velocities(results, line_color = 'bo-', save_figure = False, s
     """	
     axis_font = {'size':'14'}  
     fig = plt.figure(save_filename)
-    fig.set_size_inches(10, 8) 
+    fig.set_size_inches(10, 8)
+    
+    file=open('PlottedResults.txt', 'a+')    
+    velocity_full=[]
+    density_full=[]
+    EAS_full=[]
+    mach_full=[]
+    
     for segment in results.segments.values(): 
         time     = segment.conditions.frames.inertial.time[:,0] / Units.min 
         velocity = segment.conditions.freestream.velocity[:,0]
+        velocity_full.extend(velocity)
         pressure = segment.conditions.freestream.pressure[:,0]
         density  = segment.conditions.freestream.density[:,0]
+        density_full.extend(density)
         EAS      = velocity * np.sqrt(density/1.225)
+        EAS_full.extend(EAS)
         mach     = segment.conditions.freestream.mach_number[:,0]
+        mach_full.extend(mach)
 
         axes = fig.add_subplot(3,1,1)
         axes.plot( time , velocity / Units.kts, line_color)
@@ -131,6 +155,11 @@ def plot_aircraft_velocities(results, line_color = 'bo-', save_figure = False, s
         axes.set_xlabel('Time (min)',axis_font)
         axes.set_ylabel('Mach',axis_font)
         set_axes(axes)  
+        
+    file.write('Velocity (m/s) = '+str(velocity_full)+'\n\n')
+    file.write('EAS (m/s) = '+str(EAS_full)+'\n\n')
+    file.write('Rho (kg/m3) = '+str(density_full)+'\n\n')
+    file.write('Mach (-) = '+str(mach_full)+'\n\n')
         
     if save_figure:
         plt.savefig(save_filename + file_type) 
@@ -216,12 +245,22 @@ def plot_aerodynamic_coefficients(results, line_color = 'bo-', save_figure = Fal
     fig = plt.figure(save_filename)
     fig.set_size_inches(12, 10)
     
+    file=open('PlottedResults.txt', 'a+')
+    cl_full=[]
+    cd_full=[]
+    aoa_full=[]
+    l_d_full=[]
+    
     for segment in results.segments.values(): 
         time = segment.conditions.frames.inertial.time[:,0] / Units.min
-        cl   = segment.conditions.aerodynamics.lift_coefficient[:,0,None] 
-        cd   = segment.conditions.aerodynamics.drag_coefficient[:,0,None] 
+        cl   = segment.conditions.aerodynamics.lift_coefficient[:,0]
+        cl_full.extend(cl)
+        cd   = segment.conditions.aerodynamics.drag_coefficient[:,0]
+        cd_full.extend(cd)
         aoa  = segment.conditions.aerodynamics.angle_of_attack[:,0] / Units.deg
+        aoa_full.extend(aoa)
         l_d  = cl/cd
+        l_d_full.extend(l_d)
 
         axes = fig.add_subplot(2,2,1)
         axes.plot( time , aoa , line_color )
@@ -243,7 +282,12 @@ def plot_aerodynamic_coefficients(results, line_color = 'bo-', save_figure = Fal
         axes.plot( time , l_d, line_color )
         axes.set_xlabel('Time (min)',axis_font)
         axes.set_ylabel('L/D',axis_font)
-        set_axes(axes)            
+        set_axes(axes) 
+
+    file.write('CL (-) = '+str(cl_full)+'\n\n')
+    file.write('CD (-) = '+str(cd_full)+'\n\n')
+    file.write('AoA (º) = '+str(aoa_full)+'\n\n')
+    file.write('L/D (-) = '+str(l_d_full)+'\n\n')       
                 
     if save_figure:
         plt.savefig(save_filename + file_type) 
@@ -279,12 +323,22 @@ def plot_aerodynamic_forces(results, line_color = 'bo-', save_figure = False, sa
     fig = plt.figure(save_filename)
     fig.set_size_inches(12, 10)
     
+    file=open('PlottedResults.txt', 'a+')
+    Thrust_full=[]
+    Lift_full=[]
+    Drag_full=[]
+    eta_full=[]
+    
     for segment in results.segments.values():
         time   = segment.conditions.frames.inertial.time[:,0] / Units.min
-        Thrust = segment.conditions.frames.body.thrust_force_vector[:,0]  
+        Thrust = segment.conditions.frames.body.thrust_force_vector[:,0] #/ Units.kgf
+        Thrust_full.extend(Thrust)
         Lift   = -segment.conditions.frames.wind.lift_force_vector[:,2]
-        Drag   = -segment.conditions.frames.wind.drag_force_vector[:,0]          
+        Lift_full.extend(Lift)
+        Drag   = -segment.conditions.frames.wind.drag_force_vector[:,0]
+        Drag_full.extend(Drag)        
         eta    = segment.conditions.propulsion.throttle[:,0]
+        eta_full.extend(eta)
 
         axes = fig.add_subplot(2,2,1)
         axes.plot( time , eta , line_color )
@@ -306,7 +360,12 @@ def plot_aerodynamic_forces(results, line_color = 'bo-', save_figure = False, sa
         axes.plot( time , Drag , line_color)
         axes.set_ylabel('Drag (N)',axis_font)
         axes.set_xlabel('Time (min)',axis_font)
-        set_axes(axes)       
+        set_axes(axes)  
+        
+    file.write('Thrust (N) = '+str(Thrust_full)+'\n\n')
+    file.write('Lift (N) = '+str(Lift_full)+'\n\n')
+    file.write('Drag (N) = '+str(Drag_full)+'\n\n')
+    file.write('Throttle (-) = '+str(eta_full)+'\n\n')
     
     if save_figure:
         plt.savefig(save_filename + file_type) 
@@ -343,14 +402,26 @@ def plot_drag_components(results, line_color = 'bo-', save_figure = False, save_
     fig = plt.figure(save_filename,figsize=(8,10))
     axes = plt.gca()
     
+    file=open('PlottedResults.txt', 'a+')
+    cdp_full=[]
+    cdi_full=[]
+    cdc_full=[]
+    cdm_full=[]
+    cd_full=[]
+    
     for i, segment in enumerate(results.segments.values()):
         time   = segment.conditions.frames.inertial.time[:,0] / Units.min
         drag_breakdown = segment.conditions.aerodynamics.drag_breakdown
         cdp = drag_breakdown.parasite.total[:,0]
+        cdp_full.extend(cdp)
         cdi = drag_breakdown.induced.total[:,0]
+        cdi_full.extend(cdi)
         cdc = drag_breakdown.compressible.total[:,0]
+        cdc_full.extend(cdc)
         cdm = drag_breakdown.miscellaneous.total[:,0]
+        cdm_full.extend(cdm)
         cd  = drag_breakdown.total[:,0]
+        cd_full.extend(cd)
         
         if i == 0:
             axes.plot( time , cdp , 'ko-', label='CD parasite' )
@@ -368,7 +439,13 @@ def plot_drag_components(results, line_color = 'bo-', save_figure = False, save_
             
     axes.set_xlabel('Time (min)',axis_font)
     axes.set_ylabel('CD',axis_font)
-    axes.grid(True)         
+    axes.grid(True)
+
+    file.write('CD_parasite (-) = '+str(cdp_full)+'\n\n')
+    file.write('CD_induced (-) = '+str(cdi_full)+'\n\n')
+    file.write('CD_compressibility (-) = '+str(cdc_full)+'\n\n')
+    file.write('CD_miscellaneous (-) = '+str(cdm_full)+'\n\n')
+    file.write('CD_total (-) = '+str(cd_full)+'\n\n')         
     
     if save_figure:
         plt.savefig(save_filename + file_type) 
@@ -483,10 +560,20 @@ def plot_flight_conditions(results, line_color = 'bo-', save_figure = False, sav
     axis_font = {'size':'14'} 
     fig = plt.figure(save_filename)
     fig.set_size_inches(12, 10)
+    
+    file=open('PlottedResults.txt', 'a+')
+    time_full=[]
+    airspeed_full = []
+    thetapitch_full=[]
+    altitude_full = []
+    
     for segment in results.segments.values(): 
         time     = segment.conditions.frames.inertial.time[:,0] / Units.min
+        time_full.extend(time)
         airspeed = segment.conditions.freestream.velocity[:,0] 
-        theta    = segment.conditions.frames.body.inertial_rotations[:,1,None] / Units.deg
+        airspeed_full.extend(airspeed)
+        theta    = segment.conditions.frames.body.inertial_rotations[:,1] / Units.deg
+        thetapitch_full.extend(theta)
         cl       = segment.conditions.aerodynamics.lift_coefficient[:,0,None] 
         cd       = segment.conditions.aerodynamics.drag_coefficient[:,0,None] 
         aoa      = segment.conditions.aerodynamics.angle_of_attack[:,0] / Units.deg
@@ -495,6 +582,7 @@ def plot_flight_conditions(results, line_color = 'bo-', save_figure = False, sav
         y        = segment.conditions.frames.inertial.position_vector[:,1]
         z        = segment.conditions.frames.inertial.position_vector[:,2]
         altitude = segment.conditions.freestream.altitude[:,0]
+        altitude_full.extend(altitude)
         
         axes = fig.add_subplot(2,2,1)
         axes.plot(time, altitude, line_color)
@@ -516,7 +604,12 @@ def plot_flight_conditions(results, line_color = 'bo-', save_figure = False, sav
         axes.plot( time , x, 'bo-', time , y, 'go-' , time , z, 'ro-')
         axes.set_ylabel('Range (m)',axis_font)
         axes.set_xlabel('Time (min)',axis_font)
-        set_axes(axes)         
+        set_axes(axes) 
+        
+    file.write('Time (min) = '+str(time_full)+'\n\n')
+    file.write('Airspeed (m/s) = '+str(airspeed_full)+'\n\n')
+    file.write('Pitch Angle (º) = '+str(thetapitch_full)+'\n\n')
+    file.write('Altitude (m) = '+str(altitude_full)+'\n\n')
         
     if save_figure:
         plt.savefig(save_filename + file_type)
@@ -555,34 +648,76 @@ def plot_propeller_conditions(results, line_color = 'bo-', save_figure = False, 
     fig = plt.figure(save_filename)
     fig.set_size_inches(12, 10)  
     
+    file=open('PlottedResults.txt', 'a+')
+    rpm_full=[]
+    torque_full=[]
+    power_full=[]
+    tm_full=[]
+    Cp_full=[]
+    Ct_full=[]
+    
     for segment in results.segments.values():  
         time   = segment.conditions.frames.inertial.time[:,0] / Units.min
-        rpm    = segment.conditions.propulsion.rpm[:,0] 
+        rpm    = segment.conditions.propulsion.rpm[:,0]
+        rpm_full.extend(rpm)
         thrust = np.linalg.norm(segment.conditions.frames.body.thrust_force_vector[:,:],axis=1)
-        torque = segment.conditions.propulsion.motor_torque[:,0] 
+        torque = segment.conditions.propulsion.propeller_torque[:,0]
+        torque_full.extend(torque)
+        power = segment.conditions.propulsion.power[:,0]
+        power_full.extend(power)
         tm     = segment.conditions.propulsion.propeller_tip_mach[:,0]
+        tm_full.extend(tm)
+        Cp     = segment.conditions.propulsion.propeller_power_coefficient[:,0]
+        Cp_full.extend(Cp)
+        Ct     = segment.conditions.propulsion.propeller_thrust_coefficient[:,0]
+        Ct_full.extend(Ct)
  
-        axes = fig.add_subplot(2,2,1)
+        axes = fig.add_subplot(2,4,1)
+        axes.plot(time, power, line_color )
+        axes.set_xlabel('Time (mins)',axis_font)
+        axes.set_ylabel('Power (W)',axis_font)
+        set_axes(axes)
+        
+        axes = fig.add_subplot(2,4,2)
         axes.plot(time, thrust, line_color)
         axes.set_ylabel('Thrust (N)',axis_font)
         set_axes(axes)
         
-        axes = fig.add_subplot(2,2,2)
-        axes.plot(time, rpm, line_color)
-        axes.set_ylabel('RPM',axis_font)
-        set_axes(axes)
-        
-        axes = fig.add_subplot(2,2,3)
+        axes = fig.add_subplot(2,4,3)
         axes.plot(time, torque, line_color )
         axes.set_xlabel('Time (mins)',axis_font)
         axes.set_ylabel('Torque (N-m)',axis_font)
         set_axes(axes)  
         
-        axes = fig.add_subplot(2,2,4)
+        axes = fig.add_subplot(2,4,4)
+        axes.plot(time, rpm, line_color)
+        axes.set_ylabel('RPM',axis_font)
+        set_axes(axes)
+        
+        axes = fig.add_subplot(2,4,5)
         axes.plot(time, tm, line_color )
         axes.set_xlabel('Time (mins)',axis_font)
         axes.set_ylabel('Tip Mach',axis_font)
-        set_axes(axes)     
+        set_axes(axes)
+        
+        axes = fig.add_subplot(2,4,6)
+        axes.plot(time, Cp, line_color )
+        axes.set_xlabel('Time (mins)',axis_font)
+        axes.set_ylabel('Prop Power Coefficient',axis_font)
+        set_axes(axes)
+        
+        axes = fig.add_subplot(2,4,7)
+        axes.plot(time, Ct, line_color )
+        axes.set_xlabel('Time (mins)',axis_font)
+        axes.set_ylabel('Prop Thrust Coefficient',axis_font)
+        set_axes(axes)
+    
+    file.write('Power (W) = '+str(power_full)+'\n\n')
+    file.write('Torque (N-m) = '+str(torque_full)+'\n\n')
+    file.write('RPM (rpm) = '+str(rpm_full)+'\n\n')
+    file.write('Tip Mach (-) = '+str(tm_full)+'\n\n')
+    file.write('Propeller Cp (-) = '+str(Cp_full)+'\n\n')
+    file.write('Propeller Ct (-) = '+str(Ct_full)+'\n\n')
         
     if save_figure:
         plt.savefig(save_filename + file_type)  

@@ -18,3 +18,7 @@ from .SU2_Euler_Super              import SU2_Euler_Super
 from .SU2_inviscid_Super           import SU2_inviscid_Super
 from .Supersonic_OpenVSP_Wave_Drag import Supersonic_OpenVSP_Wave_Drag
 from .Lifting_Line                 import Lifting_Line
+from .Open_VSP_Analysis_No_Surrogates      import Open_VSP_Analysis_No_Surrogates
+from .Open_VSP_Analysis_No_Surrogates_Tecnam      import Open_VSP_Analysis_No_Surrogates_Tecnam
+from .Open_VSP_Analysis    import Open_VSP_Analysis
+from .Open_VSP_Analysis_Tecnam    import Open_VSP_Analysis_Tecnam

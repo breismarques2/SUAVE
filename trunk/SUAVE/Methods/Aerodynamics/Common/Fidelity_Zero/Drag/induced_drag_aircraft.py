@@ -72,7 +72,7 @@ def induced_drag_aircraft(state,settings,geometry):
     
     K       = configuration.viscous_lift_dependent_drag_factor
     e_osw   = configuration.oswald_efficiency_factor	
-    e_span  = configuration.span_efficiency
+    e_span  = wings.main_wing.span_efficiency
     CL      = conditions.aerodynamics.lift_coefficient
     CDi     = conditions.aerodynamics.drag_breakdown.induced.inviscid
     S_ref   = geometry.reference_area

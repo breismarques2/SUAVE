@@ -319,6 +319,16 @@ class Propeller(Energy_Component):
         epsilon[epsilon==np.inf] = 10. 
         deltar   = (r[1]-r[0])
         thrust   = rho*B*(np.sum(Gamma*(Wt-epsilon*Wa)*deltar,axis=1)[:,None])
+        #print('Gamma')
+        #print (Gamma)
+        #print('Wt')
+        #print (Wt)
+        #print('epsilon')
+        #print (epsilon)
+        #print('Wa')
+        #print (Wa)
+        #print('deltar')
+        #print (deltar)
         torque   = rho*B*np.sum(Gamma*(Wa+epsilon*Wt)*r*deltar,axis=1)[:,None]
         D        = 2*R 
         Ct       = thrust/(rho*(n*n)*(D*D*D*D))
@@ -381,7 +391,7 @@ class Propeller(Energy_Component):
                 power                            = power,
                 power_coefficient                = Cp, 
                 mid_chord_aligment               = self.mid_chord_aligment     
-            ) 
+            )
         
         return thrust, torque, power, Cp, outputs  , etap  
     

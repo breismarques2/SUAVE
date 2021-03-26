@@ -449,15 +449,92 @@ def vspaero_Tecnam(vel_sound,tag,rho,AoA,MachNumber,NumberIterations, rpm, engin
         data = []
         try:
             
+            # CL ,CDi and CD0 Total
+            
             with open(tag[:-5]+'_DegenGeom.fem') as f:
                 for line in f:
                     data.append([word for word in line.split(" ") if word])
             f.close()
             
             line_TotalForces = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'Total']
-        
             CL=float(data[line_TotalForces[1]][2])
-            CD=float(data[line_TotalForces[2]][2])
+            CDi=float(data[line_TotalForces[2]][2])
+            
+            data = []
+            
+            with open(tag[:-5]+'_DegenGeom.polar') as f:
+                for line in f:
+                    data.append([word for word in line.split(" ") if word])
+            f.close()
+            
+            CD0 = float(data[1][5])
+            
+            # Skin Friction Drag Break Out
+            
+            data = []
+            
+            
+            with open(tag[:-5]+'_DegenGeom.history') as f:
+                for line in f:
+                    data.append([word for word in line.split(" ") if word])
+            f.close()
+            
+            Line_main_wing_cdo = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'main_wing']
+            Line_horizontal_stabilizer_cdo = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'horizontal_stabilizer']
+            Line_vertical_stabilizer_cdo = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'vertical_stabilizer']
+            Line_fuselage_cdo = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'fuselage']
+            
+            main_wing_cdo = float(data[Line_main_wing_cdo[0]][1])+float(data[Line_main_wing_cdo[1]][1])
+            horizontal_stabilizer_cdo = float(data[Line_horizontal_stabilizer_cdo[0]][1])+float(data[Line_horizontal_stabilizer_cdo[1]][1])
+            vertical_stabilizer_cdo = float(data[Line_vertical_stabilizer_cdo[0]][1])
+            fuselage_cdo = float(data[Line_fuselage_cdo[0]][1])+float(data[Line_fuselage_cdo[1]][1])+float(data[Line_fuselage_cdo[2]][1])+float(data[Line_fuselage_cdo[3]][1])
+            
+            # Lift and Induced Drag Break Out
+            
+            data = []
+            
+            
+            with open(tag[:-5]+'_DegenGeom.lod') as f:
+                for line in f:
+                    data.append([word for word in line.split(" ") if word])
+            f.close()
+            
+            Line_main_wing = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'main_wing']
+            Line_horizontal_stabilizer = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'horizontal_stabilizer']
+            Line_vertical_stabilizer = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'vertical_stabilizer']
+            Line_fuselage = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'fuselage']
+            
+            main_wing_cl = float(data[Line_main_wing[0]][5])+float(data[Line_main_wing[1]][5])
+            horizontal_stabilizer_cl = float(data[Line_horizontal_stabilizer[0]][5])+float(data[Line_horizontal_stabilizer[1]][5])
+            vertical_stabilizer_cl = float(data[Line_vertical_stabilizer[0]][5])
+            fuselage_cl = float(data[Line_fuselage[0]][5])+float(data[Line_fuselage[1]][5])+float(data[Line_fuselage[2]][5])+float(data[Line_fuselage[3]][5])
+            
+            main_wing_cdi = float(data[Line_main_wing[0]][6])+float(data[Line_main_wing[1]][6])
+            horizontal_stabilizer_cdi = float(data[Line_horizontal_stabilizer[0]][6])+float(data[Line_horizontal_stabilizer[1]][6])
+            vertical_stabilizer_cdi = float(data[Line_vertical_stabilizer[0]][6])
+            fuselage_cdi = float(data[Line_fuselage[0]][6])+float(data[Line_fuselage[1]][6])+float(data[Line_fuselage[2]][6])+float(data[Line_fuselage[3]][6])
+            
+            # Lift and Drag Main Wing Distribution
+            
+            data = []
+                       
+            with open(tag[:-5]+'_DegenGeom.lod') as f:
+                for line in f:
+                    data.append([word for word in line.split(" ") if word])
+            f.close()
+            
+            Line_Wing = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'Wing']
+            
+            wing_lift_distribution = []
+            wing_drag_distribution = []
+            
+            current_line = Line_Wing[0]+1
+            
+            while data[current_line][0]=='1':
+                
+                wing_lift_distribution.append(data[current_line][5])
+                wing_drag_distribution.append(data[current_line][6])
+                current_line = current_line+1 
             
             
         except IOError:
@@ -472,7 +549,84 @@ def vspaero_Tecnam(vel_sound,tag,rho,AoA,MachNumber,NumberIterations, rpm, engin
             line_TotalForces = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'Total']
         
             CL=float(data[line_TotalForces[1]][2])
-            CD=float(data[line_TotalForces[2]][2])
+            CDi=float(data[line_TotalForces[2]][2])
+            
+            data = []
+            
+            with open(tag[:-5]+'_DegenGeom.polar') as f:
+                for line in f:
+                    data.append([word for word in line.split(" ") if word])
+            f.close()
+            
+            CD0 = float(data[1][5])
+            
+            # Skin Friction Drag Break Out
+            
+            data = []
+            
+            
+            with open(tag[:-5]+'_DegenGeom.history') as f:
+                for line in f:
+                    data.append([word for word in line.split(" ") if word])
+            f.close()
+            
+            Line_main_wing_cdo = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'main_wing']
+            Line_horizontal_stabilizer_cdo = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'horizontal_stabilizer']
+            Line_vertical_stabilizer_cdo = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'vertical_stabilizer']
+            Line_fuselage_cdo = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'fuselage']
+            
+            main_wing_cdo = float(data[Line_main_wing_cdo[0]][1])+float(data[Line_main_wing_cdo[1]][1])
+            horizontal_stabilizer_cdo = float(data[Line_horizontal_stabilizer_cdo[0]][1])+float(data[Line_horizontal_stabilizer_cdo[1]][1])
+            vertical_stabilizer_cdo = float(data[Line_vertical_stabilizer_cdo[0]][1])
+            fuselage_cdo = float(data[Line_fuselage_cdo[0]][1])+float(data[Line_fuselage_cdo[1]][1])+float(data[Line_fuselage_cdo[2]][1])+float(data[Line_fuselage_cdo[3]][1])
+            
+            # Lift and Induced Drag Break Out
+            
+            data = []
+            
+            
+            with open(tag[:-5]+'_DegenGeom.lod') as f:
+                for line in f:
+                    data.append([word for word in line.split(" ") if word])
+            f.close()
+            
+            Line_main_wing = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'main_wing']
+            Line_horizontal_stabilizer = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'horizontal_stabilizer']
+            Line_vertical_stabilizer = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'vertical_stabilizer']
+            Line_fuselage = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'fuselage']
+            
+            main_wing_cl = float(data[Line_main_wing[0]][5])+float(data[Line_main_wing[1]][5])
+            horizontal_stabilizer_cl = float(data[Line_horizontal_stabilizer[0]][5])+float(data[Line_horizontal_stabilizer[1]][5])
+            vertical_stabilizer_cl = float(data[Line_vertical_stabilizer[0]][5])
+            fuselage_cl = float(data[Line_fuselage[0]][5])+float(data[Line_fuselage[1]][5])+float(data[Line_fuselage[2]][5])+float(data[Line_fuselage[3]][5])
+            
+            main_wing_cdi = float(data[Line_main_wing[0]][6])+float(data[Line_main_wing[1]][6])
+            horizontal_stabilizer_cdi = float(data[Line_horizontal_stabilizer[0]][6])+float(data[Line_horizontal_stabilizer[1]][6])
+            vertical_stabilizer_cdi = float(data[Line_vertical_stabilizer[0]][6])
+            fuselage_cdi = float(data[Line_fuselage[0]][6])+float(data[Line_fuselage[1]][6])+float(data[Line_fuselage[2]][6])+float(data[Line_fuselage[3]][6])
+            
+            # Lift and Drag Main Wing Distribution
+            
+            data = []
+                       
+            with open(tag[:-5]+'_DegenGeom.lod') as f:
+                for line in f:
+                    data.append([word for word in line.split(" ") if word])
+            f.close()
+            
+            Line_Wing = [ix for ix, row in enumerate(data) for iy, i in enumerate(row) if i == 'Wing']
+            
+            wing_lift_distribution = []
+            wing_drag_distribution = []
+            
+            current_line = Line_Wing[0]+1
+            
+            while data[current_line][0]=='1':
+                
+                wing_lift_distribution.append(data[current_line][5])
+                wing_drag_distribution.append(data[current_line][6])
+                current_line = current_line+1 
+            
         
         #try:
             
@@ -606,5 +760,5 @@ def vspaero_Tecnam(vel_sound,tag,rho,AoA,MachNumber,NumberIterations, rpm, engin
         
         
     
-    return CL, CD
+    return CL, CDi, CD0, main_wing_cl, horizontal_stabilizer_cl, vertical_stabilizer_cl, fuselage_cl, main_wing_cdi, horizontal_stabilizer_cdi, vertical_stabilizer_cdi, fuselage_cdi, main_wing_cdo, horizontal_stabilizer_cdo, vertical_stabilizer_cdo, fuselage_cdo, wing_lift_distribution, wing_drag_distribution
 

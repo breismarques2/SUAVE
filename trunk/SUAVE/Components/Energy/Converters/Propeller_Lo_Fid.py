@@ -101,6 +101,7 @@ class Propeller_Lo_Fid(Energy_Component):
         thrust = etap*power/V
         
         Cp     = power/(rho*(n*n*n)*(D*D*D*D*D))
+        Ct       = thrust/(rho*(n*n)*(D*D*D*D))
         conditions.propulsion.etap = etap
         
-        return thrust, Qm, power, Cp
+        return thrust, Qm, power, Cp, Ct

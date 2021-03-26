@@ -22,3 +22,4 @@ from .Open_VSP_Analysis_No_Surrogates      import Open_VSP_Analysis_No_Surrogate
 from .Open_VSP_Analysis_No_Surrogates_Tecnam      import Open_VSP_Analysis_No_Surrogates_Tecnam
 from .Open_VSP_Analysis    import Open_VSP_Analysis
 from .Open_VSP_Analysis_Tecnam    import Open_VSP_Analysis_Tecnam
+from .Open_VSP_Analysis_Tecnam_Updated    import Open_VSP_Analysis_Tecnam_Updated

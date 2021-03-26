@@ -12,3 +12,4 @@ from .VSP_inviscid_No_Surrogates import VSP_inviscid_No_Surrogates
 from .VSP_inviscid_No_Surrogates_Tecnam import VSP_inviscid_No_Surrogates_Tecnam
 from .VSP_Analysis_OLS import VSP_Analysis_OLS
 from .VSP_Analysis_MLP_Tecnam import VSP_Analysis_MLP_Tecnam
+from .VSP_Analysis_MLP_Tecnam_Updated import VSP_Analysis_MLP_Tecnam_Updated

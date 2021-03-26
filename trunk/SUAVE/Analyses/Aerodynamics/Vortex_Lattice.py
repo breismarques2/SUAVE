@@ -124,7 +124,7 @@ class Vortex_Lattice(Aerodynamics):
 
         Properties Used:
         None
-        """                      
+        """    
         # Unpack:
         geometry = self.geometry
         settings = self.settings      
@@ -193,7 +193,8 @@ class Vortex_Lattice(Aerodynamics):
           wing_lift_coefficient[wings.*.tag]      [-] CL (wing specific)
         """          
         
-        # unpack        
+        # unpack  
+        
         conditions  = state.conditions
         settings    = self.settings
         geometry    = self.geometry
@@ -249,7 +250,8 @@ class Vortex_Lattice(Aerodynamics):
         conditions.aerodynamics.lift_breakdown.total            = np.atleast_2d(inviscid_lift).T
         conditions.aerodynamics.drag_breakdown.induced.inviscid = np.atleast_2d(inviscid_drag).T
         
-        for wing in geometry.wings.keys(): 
+        for wing in geometry.wings.keys():
+            print(wing)
             inviscid_wing_lifts      = np.zeros([data_len,1])
             inviscid_wing_drags      = np.zeros([data_len,1])            
             inviscid_wing_lifts = h_sub(Mach)*wing_CL_surrogates_sub[wing](AoA,Mach,grid=False)    + \
@@ -310,6 +312,7 @@ class Vortex_Lattice(Aerodynamics):
         # if in transonic regime, use surrogate
         inviscid_lift, inviscid_drag, wing_lifts, wing_drags, wing_lift_distribution , wing_drag_distribution , pressure_coefficient = \
             calculate_VLM(conditions,settings,geometry)
+        
         
         # Lift 
         conditions.aerodynamics.lift_coefficient                        = inviscid_lift  
@@ -461,7 +464,6 @@ class Vortex_Lattice(Aerodynamics):
           drag_coefficient            [-] 
           wing_drag_coefficient       [-] (wing specific)
         """           
-
         # unpack data
         surrogates     = self.surrogates
         training       = self.training
@@ -574,7 +576,7 @@ def calculate_VLM(conditions,settings,geometry):
     wing_drags                      [Data]
     Properties Used:
     
-    """            
+    """         
     # iterate over wings
     total_lift_coeff = 0.0
     wing_lifts = Data()

@@ -39,7 +39,7 @@ import os
 #  Class
 # ----------------------------------------------------------------------
 ## @ingroup Analyses-Aerodynamics
-class VSP_Analysis_MLP_Tecnam(Aerodynamics):
+class VSP_Analysis_MLP_Tecnam_Updated(Aerodynamics):
     """This builds a surrogate and computes lift and drag using SU2
 
     Assumptions:
@@ -86,8 +86,15 @@ class VSP_Analysis_MLP_Tecnam(Aerodynamics):
         self.cp_range        = [0.0, 0.8]
         self.ct_range        = [0.0, 0.5]
         self.flap_range      = [0.0, 30.0] #º
-        self.filenameCL = '/Users/Bruno/Documents/Delft/Courses/2016-2017/Thesis/2ndMethology/Surrogate/NN_Surrogate_Model_MLPRegressor_CL.sav'
+        self.filenameCDi_HS = '/Users/Bruno/Documents/Delft/Courses/2016-2017/Thesis/2ndMethology/Surrogate/NN_Surrogate_Model_MLPRegressor_CDi_HS.sav'
+        self.filenameCDi_VS = '/Users/Bruno/Documents/Delft/Courses/2016-2017/Thesis/2ndMethology/Surrogate/NN_Surrogate_Model_MLPRegressor_CDi_VS.sav'
+        self.filenameCDi_Wing = '/Users/Bruno/Documents/Delft/Courses/2016-2017/Thesis/2ndMethology/Surrogate/NN_Surrogate_Model_MLPRegressor_CDi_Wing.sav'
+        self.filenameCL_HS = '/Users/Bruno/Documents/Delft/Courses/2016-2017/Thesis/2ndMethology/Surrogate/NN_Surrogate_Model_MLPRegressor_CL_HS.sav'
+        self.filenameCL_VS = '/Users/Bruno/Documents/Delft/Courses/2016-2017/Thesis/2ndMethology/Surrogate/NN_Surrogate_Model_MLPRegressor_CL_VS.sav'
+        self.filenameCL_Wing = '/Users/Bruno/Documents/Delft/Courses/2016-2017/Thesis/2ndMethology/Surrogate/NN_Surrogate_Model_MLPRegressor_CL_Wing.sav'
+        self.filenameCDi = '/Users/Bruno/Documents/Delft/Courses/2016-2017/Thesis/2ndMethology/Surrogate/NN_Surrogate_Model_MLPRegressor_CDi.sav'
         self.filenameCD = '/Users/Bruno/Documents/Delft/Courses/2016-2017/Thesis/2ndMethology/Surrogate/NN_Surrogate_Model_MLPRegressor_CD.sav'
+        self.filenameCL = '/Users/Bruno/Documents/Delft/Courses/2016-2017/Thesis/2ndMethology/Surrogate/NN_Surrogate_Model_MLPRegressor_CL.sav'
         self.surrogates = Data()
 
 
@@ -118,11 +125,22 @@ class VSP_Analysis_MLP_Tecnam(Aerodynamics):
         conditions = state.conditions
         
         mach = conditions.freestream.mach_number
-        AoA  = conditions.aerodynamics.angle_of_attack
+        AoA  = np.degrees(conditions.aerodynamics.angle_of_attack)
+        #print(AoA)
         engines_number_tot = geometry.propulsors.propulsor.number_of_engines
         rpm = conditions.propulsion.rpm
         
         #print conditions.freestream
+        
+        
+        # Create Result Data Structures 
+        
+        conditions.aerodynamics.drag_breakdown.induced                     = Data()
+        conditions.aerodynamics.drag_breakdown.induced.inviscid_wings      = Data()
+        conditions.aerodynamics.lift_breakdown                             = Data()
+        conditions.aerodynamics.lift_breakdown.inviscid_wings              = Data()
+        conditions.aerodynamics.lift_breakdown.compressible_wings          = Data()
+        conditions.aerodynamics.drag_breakdown.compressible                = Data()
         
         rho=conditions.freestream.density
         vel_sound=conditions.freestream.speed_of_sound
@@ -161,57 +179,70 @@ class VSP_Analysis_MLP_Tecnam(Aerodynamics):
         x_data.values[:,0]=x_data.values[:,0]/self.vel_sound_range[1]
         x_data.values[:,1]=x_data.values[:,1]/self.rho_range[1]
         x_data.values[:,2]=x_data.values[:,2]/self.alpha_range[1]
+        #print(x_data.values[:,2])
         #x_data.values[:,3]=x_data.values[:,3]/mach_range[1]
         x_data.values[:,4]=x_data.values[:,4]/self.rpm_range[1]
         #x_data.values[:,5]=x_data.values[:,5]/cp_range[1]
         #x_data.values[:,6]=x_data.values[:,6]/ct_range[1]
         x_data.values[:,7]=x_data.values[:,7]/self.flap_range[1]
-                
+         
+        #Load files
         
-        lift_model = pickle.load(open(self.filenameCL, 'rb'))
-        drag_model = pickle.load(open(self.filenameCD, 'rb'))
+        CDi_HS_model = pickle.load(open(self.filenameCDi_HS, 'rb'))
+        CDi_VS_model = pickle.load(open(self.filenameCDi_VS, 'rb'))
+        CDi_Wing_model = pickle.load(open(self.filenameCDi_Wing, 'rb'))
+        CL_HS_model = pickle.load(open(self.filenameCL_HS, 'rb'))
+        CL_VS_model = pickle.load(open(self.filenameCL_VS, 'rb'))
+        CL_Wing_model = pickle.load(open(self.filenameCL_Wing, 'rb'))
+        CDi_model = pickle.load(open(self.filenameCDi, 'rb'))
+        CD_model = pickle.load(open(self.filenameCD, 'rb'))
+        CL_model = pickle.load(open(self.filenameCL, 'rb'))
         
-        # Inviscid lift and Drag
-        inviscid_lift = lift_model.predict(x_data.values)
-        CD            = drag_model.predict(x_data.values)
+        # Induced Drag, Drag and Inviscid lift
+        CDi     = CDi_model.predict(x_data.values)
+        CD      = CD_model.predict(x_data.values)
+        CL      = CL_model.predict(x_data.values)
         
-        #for ii,_ in enumerate(inviscid_lift):
-        #    print (inviscid_lift[ii])
-        #    inviscid_lift[ii]=[inviscid_lift[ii]]
-        #    CD[ii]=[CD[ii]]
-        
-        inviscid_lift = inviscid_lift.reshape((len(inviscid_lift), 1))
+        CDi = CDi.reshape((len(CDi), 1))
         CD = CD.reshape((len(CD), 1))
+        CL = CL.reshape((len(CL), 1))
         
-        print(inviscid_lift)
+        #print(CL)
         
         #print ('CL='+str(inviscid_lift))
         #print ('CD='+str(CD))
         
-            
-        conditions.aerodynamics.lift_breakdown.inviscid_wings_lift       = Data()
-        conditions.aerodynamics.lift_breakdown.inviscid_wings_lift.total = inviscid_lift
-        conditions.aerodynamics.lift_coefficient                        = inviscid_lift
-        conditions.aerodynamics.lift_breakdown.total                    = inviscid_lift
-        #state.conditions.aerodynamics.lift_coefficient                   = inviscid_lift
-        #state.conditions.aerodynamics.lift_breakdown.compressible_wings  = inviscid_lift
-        
-        # Inviscid drag, zeros are a placeholder for possible future implementation
-        #inviscid_drag                                              = np.zeros([data_len,1])
-        conditions.aerodynamics.drag_breakdown.induced                 = Data()
-        conditions.aerodynamics.drag_breakdown.induced.total       = CD
-        conditions.aerodynamics.drag_breakdown.induced.inviscid   = CD
-        #state.conditions.aerodynamics.inviscid_drag_coefficient    = CD
-        
-        # Now calculate the vehicle level oswald efficiency
-        
-        CL      = conditions.aerodynamics.lift_coefficient
-        
-        AR = geometry.wings.main_wing.aspect_ratio
-        
-        e_osw = (CL**2)/(np.pi*AR*CD)
+        # Pack
+        conditions.aerodynamics.lift_coefficient                = CL
+        conditions.aerodynamics.lift_breakdown.total            = CL
+        conditions.aerodynamics.drag_breakdown.induced.inviscid = CDi
         
         
-        conditions.aerodynamics.drag_breakdown.induced.oswald_efficiency_factor = e_osw
+        for wing in geometry.wings.keys():
+            #print(wing)
+         
+            if wing == 'horizontal_stabilizer':
+                #print('Entering HS')
+                CDi_Wing     = CDi_HS_model.predict(x_data.values)
+                CL_Wing      = CL_HS_model.predict(x_data.values)
+                
+            elif wing == 'vertical_stabilizer':
+                #print('Entering VS')
+                CDi_Wing     = CDi_VS_model.predict(x_data.values)
+                CL_Wing      = CL_VS_model.predict(x_data.values)
+                
+            elif wing == 'main_wing':
+                #print('Entering Wing')
+                CDi_Wing     = CDi_Wing_model.predict(x_data.values)
+                CL_Wing      = CL_Wing_model.predict(x_data.values)
+                
+            CDi_Wing = CDi_Wing.reshape((len(CDi_Wing), 1))
+            CL_Wing = CL_Wing.reshape((len(CL_Wing), 1))
+                
+            # Pack 
+            conditions.aerodynamics.lift_breakdown.inviscid_wings[wing]         = CL_Wing
+            conditions.aerodynamics.lift_breakdown.compressible_wings[wing]     = CL_Wing
+            conditions.aerodynamics.drag_breakdown.induced.inviscid_wings[wing] = CDi_Wing
         
-        return inviscid_lift
+        
+        return 
